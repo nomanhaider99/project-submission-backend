@@ -7,9 +7,8 @@ from pymongo import ReturnDocument
 from typing import List
 from dotenv import load_dotenv
 from mailer import send_email_message
-from drive import create_folder, upload_file_to_folder, get_folder_link
+from drive import create_folder, get_folder_link, upload_uploadfile_to_folder
 import os
-import shutil
 
 load_dotenv()
 
@@ -33,14 +32,7 @@ def submit_project(data=None, files: List[UploadFile] = None):
             folder_id = create_folder(folder_name)
 
             for file in files:
-                local_path = os.path.join(UPLOAD_DIR, file.filename)
-
-                with open(local_path, "wb") as buffer:
-                    shutil.copyfileobj(file.file, buffer)
-
-                upload_file_to_folder(local_path, file.filename, folder_id)
-
-                os.remove(local_path)
+                upload_uploadfile_to_folder(file, folder_id)
 
             group_data.project_details.code_file_path = get_folder_link(folder_id)
 
@@ -59,7 +51,6 @@ def submit_project(data=None, files: List[UploadFile] = None):
     except HTTPException:
         raise
     except Exception as e:
-        print("❌ Submit Error:", e)
         raise HTTPException(status_code=500, detail=str(e))
 
 def get_submission_details(id: str):
